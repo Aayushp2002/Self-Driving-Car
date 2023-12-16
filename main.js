@@ -9,7 +9,7 @@ car.draw(ctx); // draw the car
 animate();
 
 function animate(){ // animate the car
-    car.update(); // update the car
+    car.update(road.borders); // update the car
     canvas.height=window.innerHeight; // set canvas height to window height
     ctx.save(); // save the context
     ctx.translate(0,-car.y+canvas.height*(7/10)); // translate the context
