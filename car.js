@@ -11,6 +11,7 @@ class Car{ // create a car class
         this.friction=0.05; // set the friction to 0.1
         this.angle=0; // set the angle to 0
 
+
         this.sensor=new Sensor(this); // create a new sensor object
         this.controls=new Controls(); // create a new controls object
     }

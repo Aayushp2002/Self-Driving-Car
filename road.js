@@ -10,10 +10,10 @@ class Road{ // Road class
         this.top=-infinity; // set the top to negative infinity
         this.bottom=infinity; // set the bottom to infinity
 
-        const topLeft=[ this.left,this.top]; // top left corner
-        const topRight=[this.right,this.top]; // top right corner
-        const bottomLeft=[this.left,this.bottom]; // bottom left corner
-        const bottomRight=[this.right,this.bottom]; // bottom right corner
+        const topLeft={ x: this.left, y: this.top }; // top left corner
+        const topRight={ x: this.right, y: this.top }; // top right corner
+        const bottomLeft={x:this.left,y: this.bottom}; // bottom left corner
+        const bottomRight={x:this.right,y:this.bottom}; // bottom right corner
         this.borders=[
             [topLeft,bottomLeft],
             [topRight,bottomRight]

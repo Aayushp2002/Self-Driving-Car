@@ -1,81 +1,90 @@
-class Sensor{ // Sensor class
-    constructor(car){ // constructor takes in a car object
+class Sensor{
+    constructor(car){
         this.car=car;
         this.rayCount=5;
         this.rayLength=150;
         this.raySpread=Math.PI/2;
- 
+
         this.rays=[];
-        this.readings=[]; // create an array of readings for each ray in the array of rays 
-
+        this.readings=[];
     }
 
-    update(roadBorders){ // update the sensor
-        this.#castRays(); // cast the rays
-        this.readings=[]; // reset the readings
-        for(let i=0;i<this.rays.length;i++){ // for each ray in the array of rays
-            this.readings.push(this.#getReading(this.rays[i],roadBorders)); // add the reading to the array of readings
+    update(roadBorders){
+        this.#castRays();
+        this.readings=[];
+        for(let i=0;i<this.rays.length;i++){
+            const reading = this.#getReading(this.rays[i], roadBorders);
+            this.readings.push(reading);
         }
+        // console.log('Readings:', this.readings); // Debugging log
+
+        
     }
 
-    #getReading(ray,roadBorders){ // get the reading
-        let touches=[]; // create an array of touches
-        for(let i=0;i<roadBorders.length;i++){ // for each border in the array of borders
-            const touch=getIntersection(ray[0],ray[1],roadBorders[i][0],roadBorders[i][1]); // get the intersection of the ray and the border
-            if(touch){ // if there is an intersection
-                touches.push(touch); // add the intersection to the array of touches
+    #getReading(ray, roadBorders){
+        let touches = [];
+        for (let i = 0; i < roadBorders.length; i++) {
+            const touch = getIntersection(ray[0], ray[1], roadBorders[i][0], roadBorders[i][1]);
+            // console.log(`Ray Start: (${ray[0].x}, ${ray[0].y}), Ray End: (${ray[1].x}, ${ray[1].y}), Border Start: (${roadBorders[i][0].x}, ${roadBorders[i][0].y}), Border End: (${roadBorders[i][1].x}, ${roadBorders[i][1].y}), Intersection: ${touch ? `(${touch.x}, ${touch.y})` : 'null'}`);
+            if (touch) {
+                touches.push(touch);
             }
         }
-        if(touches.length==0){ // if there are no intersections
-            return null; // return the ray length
-        }else{
-            const offsets=touches.map(e=>e.offset); // get the offsets of the touches
-            const minOffset=Math.min(...offsets); // get the minimum offset
-            return touches.find(e=>e.offset==minOffset); // return the touch with the minimum offset
+        if (touches.length == 0) {
+            return null;
+        } else {
+            const offsets = touches.map(e => e.offset);
+            const minOffset = Math.min(...offsets);
+            return touches.find(e => e.offset == minOffset);
         }
     }
+    
+    
 
-    #castRays(){ // cast the rays
-        this.rays=[]; // reset the rays
-        for(let i=0;i<this.rayCount;i++){ // for each ray in the ray count 
-            const rayAngle=lerp( // get the ray angle
-                this.raySpread/2, // start at the ray spread divided by 2
-                -this.raySpread/2, // end at the negative ray spread divided by 2
-                this.rayCount==1?0.5:i/(this.rayCount-1) // if there is only one ray, set the t value to 0.5, otherwise set the t value to the current ray divided by the ray count minus 1
-            )+this.car.angle; // add the car angle to the ray angle
-            const start={x:this.car.x,y:this.car.y}; // get the start of the ray
-            const end={ // get the end of the ray
-                x:this.car.x- // get the x value of the end of the ray
-                    Math.sin(rayAngle)*this.rayLength, // get the x value of the end of the ray
-                y:this.car.y- // get the y value of the end of the ray
-                    Math.cos(rayAngle)*this.rayLength // get the y value of the end of the ray
+    #castRays(){
+        this.rays=[];
+        for(let i=0;i<this.rayCount;i++){
+            const rayAngle=lerp(this.raySpread/2,-this.raySpread/2, this.rayCount==1?0.5:i/(this.rayCount-1))+this.car.angle;
+            const start={x:this.car.x,y:this.car.y};
+            const end={
+                x:this.car.x-
+                    Math.sin(rayAngle)*this.rayLength,
+                y:this.car.y-
+                    Math.cos(rayAngle)*this.rayLength
             };
-            this.rays.push([start,end]); // add the ray to the array of rays
-
+            this.rays.push([start,end]);
+            // console.log(`Ray ${i}: Start(${start.x}, ${start.y}), End(${end.x}, ${end.y})`); // Log ray coordinates for debugging
         }
     }
 
     draw(ctx){
-        for(let i = 0; i < this.rays.length; i++){
+        for(let i = 0; i < this.rayCount; i++){
+            if (!this.rays[i] || !this.rays[i][0] || !this.rays[i][1]) {
+                // Skip this iteration if the ray data is incomplete
+                continue;
+            }
             let end = this.readings[i] ? this.readings[i] : this.rays[i][1];
-    
+            // Draw the part of the ray up to the reading in yellow
             ctx.beginPath();
             ctx.lineWidth = 2;
-    
-            // Change color based on whether there's a reading
-            if(this.readings[i]) {
-                // If there's a reading, draw the ray in black
-                ctx.strokeStyle = "black";
-            } else {
-                // If there's no reading, draw the ray in red
-                ctx.strokeStyle = "red";
-            }
-    
+            ctx.strokeStyle = "yellow";
             ctx.moveTo(this.rays[i][0].x, this.rays[i][0].y);
             ctx.lineTo(end.x, end.y);
             ctx.stroke();
+
+            // If there is a reading, draw the remaining part of the ray in black
+            if (this.readings[i]) {
+                ctx.beginPath();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "black";
+                ctx.moveTo(end.x, end.y);
+                ctx.lineTo(this.rays[i][1].x, this.rays[i][1].y);
+                ctx.stroke();
+            }
         }
     }
     
+    
 
+    
 }
