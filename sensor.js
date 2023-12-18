@@ -9,11 +9,11 @@ class Sensor{
         this.readings=[];
     }
 
-    update(roadBorders){
+    update(roadBorders,traffic){
         this.#castRays();
         this.readings=[];
         for(let i=0;i<this.rays.length;i++){
-            const reading = this.#getReading(this.rays[i], roadBorders);
+            const reading = this.#getReading(this.rays[i], roadBorders, traffic);
             this.readings.push(reading);
         }
         // console.log('Readings:', this.readings); // Debugging log
@@ -21,13 +21,27 @@ class Sensor{
         
     }
 
-    #getReading(ray, roadBorders){
+    #getReading(ray, roadBorders, traffic){
         let touches = [];
         for (let i = 0; i < roadBorders.length; i++) {
             const touch = getIntersection(ray[0], ray[1], roadBorders[i][0], roadBorders[i][1]);
             // console.log(`Ray Start: (${ray[0].x}, ${ray[0].y}), Ray End: (${ray[1].x}, ${ray[1].y}), Border Start: (${roadBorders[i][0].x}, ${roadBorders[i][0].y}), Border End: (${roadBorders[i][1].x}, ${roadBorders[i][1].y}), Intersection: ${touch ? `(${touch.x}, ${touch.y})` : 'null'}`);
             if (touch) {
                 touches.push(touch);
+            }
+        }
+        for(let i=0;i<traffic.length;i++){
+            const poly=traffic[i].polygon;
+            for(let j=0;j<poly.length;j++){
+                const value=getIntersection(
+                    ray[0],
+                    ray[1],
+                    poly[j],
+                    poly[(j+1)%poly.length]
+                );
+                if(value){
+                    touches.push(value);
+                }
             }
         }
         if (touches.length == 0) {

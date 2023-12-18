@@ -1,5 +1,5 @@
 class Car{ // create a car class
-    constructor(x,y,width,height){ // constructor takes in x,y,width,height
+    constructor(x,y,width,height,controlType, maxSpeed=3){ // constructor takes in x,y,width,height
         this.x=x;
         this.y=y;
         this.width=width;
@@ -7,29 +7,39 @@ class Car{ // create a car class
 
         this.speed=0; // set the speed to 0
         this.acceleration=0.2; // set the acceleration to 0.1
-        this.maxSpeed=3; // set the max speed to 5
+        this.maxSpeed=maxSpeed; // set the max speed
         this.friction=0.05; // set the friction to 0.1
         this.angle=0; // set the angle to 0
         this.damaged=false; // set the damaged to false
 
 
-        this.sensor=new Sensor(this); // create a new sensor object
-        this.controls=new Controls(); // create a new controls object
+        if(controlType!="DUMMY"){
+            this.sensor=new Sensor(this); // create a new sensor object
+        }
+        
+        this.controls=new Controls(controlType); // create a new controls object
     }
 
-    update(roadBorders){ // update the car
+    update(roadBorders,traffic){ // update the car
         if(!this.damaged){
             this.#move(); // move the car
             this.polygon=this.#createPolygon(); // create the polygon
-            this.damaged=this.accessDamage(roadBorders); // check if the car is damaged
+            this.damaged=this.accessDamage(roadBorders,traffic); // check if the car is damaged
         }
         
-        this.sensor.update(roadBorders); // update the sensor
+        if(this.sensor){
+            this.sensor.update(roadBorders,traffic); // update the sensor
+        }
     }
 
-    accessDamage(roadBorders){ // check if the car is damaged
+    accessDamage(roadBorders,traffic){ // check if the car is damaged
         for(let i=0;i<roadBorders.length;i++){
             if(polysIntersect(this.polygon,roadBorders[i])){
+                return true;
+            }
+        }
+        for(let i=0;i<traffic.length;i++){
+            if(polysIntersect(this.polygon,traffic[i].polygon)){
                 return true;
             }
         }
@@ -98,11 +108,11 @@ class Car{ // create a car class
         this.y-=this.speed*Math.cos(this.angle); // move the car
     }
 
-    draw(ctx){
+    draw(ctx,color){
         if(this.damaged){
             ctx.fillStyle='gray';
         }else{
-            ctx.fillStyle='black';
+            ctx.fillStyle=color;
         }
         if(!this.polygon) return; // Ensure the polygon exists
     
@@ -116,7 +126,9 @@ class Car{ // create a car class
         ctx.fill();
         ctx.restore(); // Restore the context state
     
-        this.sensor.draw(ctx); // Draw the sensor
+        if(this.sensor){
+            this.sensor.draw(ctx); // draw the sensor
+        }
     }
     
 }
