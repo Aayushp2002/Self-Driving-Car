@@ -124,7 +124,7 @@ class Car{ // create a car class
         this.y-=this.speed*Math.cos(this.angle); // move the car
     }
 
-    draw(ctx,color){
+    draw(ctx,color,drawSensor=false){
         if(this.damaged){
             ctx.fillStyle='gray';
         }else{
@@ -142,7 +142,7 @@ class Car{ // create a car class
         ctx.fill();
         ctx.restore(); // Restore the context state
     
-        if(this.sensor){
+        if(this.sensor && drawSensor){
             this.sensor.draw(ctx); // draw the sensor
         }
     }
