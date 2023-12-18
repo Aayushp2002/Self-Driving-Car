@@ -22,6 +22,9 @@ class Car{ // create a car class
         }
         
         this.controls=new Controls(controlType); // create a new controls object
+
+        this.image=new Image();
+        this.image.src="car.png";
     }
 
     update(roadBorders,traffic){ // update the car
@@ -125,22 +128,17 @@ class Car{ // create a car class
     }
 
     draw(ctx,color,drawSensor=false){
-        if(this.damaged){
-            ctx.fillStyle='gray';
-        }else{
-            ctx.fillStyle=color;
-        }
-        if(!this.polygon) return; // Ensure the polygon exists
-    
-        ctx.save(); // Save the current state of the context
-        ctx.beginPath();
-        ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
-        for(let i = 1; i < this.polygon.length; i++){
-            ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
-        }
-        ctx.closePath(); // Close the path
-        ctx.fill();
-        ctx.restore(); // Restore the context state
+        ctx.save();
+        ctx.translate(this.x,this.y);
+        ctx.rotate(-this.angle);
+        ctx.drawImage(
+            this.image,
+            -this.width/2,
+            -this.height/2,
+            this.width,
+            this.height
+        );
+        ctx.restore();
     
         if(this.sensor && drawSensor){
             this.sensor.draw(ctx); // draw the sensor
